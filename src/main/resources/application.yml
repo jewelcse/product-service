@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: product-service
+  datasource:
+    url: jdbc:sqlserver://jewelcsebu045.database.windows.net:1433;database=product-service;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
+    username: jewelcse045
+    password: Jewel@1234
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+      dialect : org.hibernate.dialect.MySQLDialect
+
+server:
+  port: 8200
