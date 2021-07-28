@@ -75,11 +75,18 @@ public class ProductController {
      Admin Endpoint for remove product
      */
     @GetMapping("/remove/product")
-    public void removeProduct(@RequestParam int id){
+    public ResponseEntity<String> removeProduct(@RequestParam int id){
+
+        if (id<0 ){
+            throw new ApplicationException("Invalid Product Id!");
+        }
+
         Product product = productService.getProductById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found for this id :: " + id));
 
         productService.removeProduct(product);
+
+        return new ResponseEntity<>("Deleted product successfully!",HttpStatus.OK);
 
     }
 
@@ -96,6 +103,11 @@ public class ProductController {
     @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/get/product")
     public ResponseEntity<Product> getSingleProduct(@RequestParam int productId){
+
+        if (productId<0 ){
+            throw new ApplicationException("Invalid Product Id!");
+        }
+
         Product product = productService.getProductById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found for this id :" + productId));
 
@@ -106,7 +118,6 @@ public class ProductController {
     public ResponseEntity<Product> update(@RequestBody Product product, @PathVariable int id) {
         try {
             Product existingProduct = productService.getProductById(id).get();
-
             product.setId(id);
             productService.saveOrUpdateProduct(product);
             return new ResponseEntity<>(HttpStatus.OK);
