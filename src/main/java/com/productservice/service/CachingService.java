@@ -21,6 +21,7 @@ public class CachingService {
 
 
     public void evictAllCaches() {
+        System.out.println("Cached Cleared!");
         cacheManager.getCacheNames().stream().forEach(cache->cacheManager.getCache(cache).clear());
     }
 }

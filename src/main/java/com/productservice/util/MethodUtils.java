@@ -1,16 +1,21 @@
 package com.productservice.util;
 
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.http.HttpStatus;
 
 import java.sql.Date;
 import java.text.Normalizer;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
 
 public class MethodUtils {
+	private static final String dateTimeFormat = "yyyy-MM-dd HH:mm:ss";
+
 
 	private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
 	private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
@@ -31,9 +36,9 @@ public class MethodUtils {
 		public static String prepareErrorJSON(HttpStatus status, Exception ex) {
 	    	JSONObject errorJSON=new JSONObject();
 	    	try {
-				errorJSON.put("success","False");
+				errorJSON.put("success",false);
 				errorJSON.put("message",ex.getMessage());
-		    	errorJSON.put("status_code",status.value());
+		    	errorJSON.put("statusCode",status.value());
 			} catch (JSONException e) {
 				
 				e.printStackTrace();
@@ -46,9 +51,9 @@ public class MethodUtils {
 			JSONObject errorJSON=new JSONObject();
 	    	System.out.println("MethodUtils");
 	    	try {
-				errorJSON.put("success","False");
+				errorJSON.put("success",false);
 				errorJSON.put("message","Invalid input");
-		    	errorJSON.put("status_code",status.value());
+		    	errorJSON.put("statusCode",status.value());
 			} catch (JSONException e) {
 				
 				e.printStackTrace();
@@ -57,10 +62,31 @@ public class MethodUtils {
 	    	return errorJSON.toString();
 		}
 
+	public static String prepareSuccessJSON(HttpStatus status, String message) {
+		JSONObject successJSON=new JSONObject();
+		try {
+			successJSON.put("success",true);
+			successJSON.put("message",message);
+			successJSON.put("statusCode",status.value());
+		} catch (JSONException e) {
+
+			e.printStackTrace();
+		}
+
+		return successJSON.toString();
+	}
+
 	public static Date getDate() {
 		long millis=System.currentTimeMillis();
 		java.sql.Date date=new java.sql.Date(millis);
 		return date;
+	}
+
+	public static String getLocalDateTime(){
+		LocalDateTime now = LocalDateTime.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateTimeFormat);
+		String formatDateTime = now.format(formatter);
+		return formatDateTime;
 	}
 
 	public static Object getWrapperDoublePrice(double productPrice) {
