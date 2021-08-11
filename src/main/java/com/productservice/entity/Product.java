@@ -4,7 +4,8 @@ package com.productservice.entity;
 import lombok.*;
 
 import javax.persistence.*;
-
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Data
@@ -21,7 +22,9 @@ public class Product{
     private String productSlug;
     private String productOverview;
     private String productDescription;
-    private String[] productImages;
+    @ElementCollection
+    @CollectionTable(name = "product_images_table", joinColumns = @JoinColumn(name = "id"))
+    private List<String> productImages;
     private int categoryId;
     private int sellerId;
     private double productOriginalPrice;

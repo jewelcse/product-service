@@ -8,12 +8,22 @@ import com.productservice.util.JsonResponseEntityModel;
 import com.productservice.util.MethodUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/product-service/")
@@ -21,6 +31,7 @@ public class ProductController {
 
     private ProductServiceImp productService;
     JsonResponseEntityModel responseEntityModel = new JsonResponseEntityModel();
+    private String url = "localhost:8200/api/v1/product-service/uploads/";
 
     @Autowired
     public ProductController(ProductServiceImp productService){
@@ -28,9 +39,9 @@ public class ProductController {
     }
 
 
-    //@RabbitListener(queues = ProductConfig.PRODUCT_QUEUE)
-    @PostMapping("/product/create")
-    public ResponseEntity <JsonResponseEntityModel> createProduct(@RequestBody Product product) throws RuntimeException{
+    @PostMapping(path = "/product/create",consumes = {"multipart/form-data"})//consumes = {"multipart/form-data"}consumes = {"multipart/mixed"}
+    public ResponseEntity <JsonResponseEntityModel> createProduct(@ModelAttribute  Product product, @RequestParam() MultipartFile[] files) throws RuntimeException, IOException {
+
 
         if (product.getProductTitle().isEmpty() || product.getProductTitle() == null){
             throw new ApplicationException("Product Title can't be Empty");
@@ -46,10 +57,6 @@ public class ProductController {
 
         if (product.getCategoryId() <=0){
             throw new ApplicationException("Product Invalid Category Id");
-        }
-
-        if (product.getProductImages().length==0){
-            throw new ApplicationException("Add at least one Image");
         }
 
         if (product.getProductOriginalPrice()<=0){
@@ -71,8 +78,10 @@ public class ProductController {
         if (doesExit){
             throw new ApplicationException(product.getProductTitle() + "Already Exit ");
         }
-
         product.setProductSlug(ps);
+
+        product.setProductImages(saveImages(files));
+
         product.setCreatedAt(MethodUtils.getLocalDateTime());
         product.setUpdatedAt(null);
 
@@ -83,6 +92,40 @@ public class ProductController {
 
         return new ResponseEntity<>(responseEntityModel,HttpStatus.CREATED);
     }
+
+
+    private List<String> saveImages(MultipartFile[] files) throws IOException {
+        List<String> fileNames = new ArrayList<>();
+        Arrays.asList(files).stream().forEach(file->{
+            fileNames.add(url+productService.saveFiles(file).toString());
+        });
+        return fileNames;
+    }
+
+    @GetMapping("/uploads/{filename:.+}")
+    public ResponseEntity<Resource> getPath(@PathVariable String filename, HttpServletRequest request){
+        Resource resource = productService.load(filename);
+        String contentType = null;
+        try {
+            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+            System.out.println(resource.getFile().getAbsolutePath() + " content");
+        } catch (IOException ex) {
+            System.out.println("Could not determine file type.");
+        }
+
+        // Fallback to the default content type if type could not be determined
+        if(contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        System.out.println(resource.getFilename() + " resoyrce");
+        return ResponseEntity.ok() .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"").body(resource);
+
+
+    }
+
+
     /*
      Admin Endpoint for remove product
      */
