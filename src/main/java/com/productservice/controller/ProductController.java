@@ -97,7 +97,8 @@ public class ProductController {
     private List<String> saveImages(MultipartFile[] files) throws IOException {
         List<String> fileNames = new ArrayList<>();
         Arrays.asList(files).stream().forEach(file->{
-            fileNames.add(url+productService.saveFiles(file).toString());
+
+            fileNames.add(productService.saveFiles(file).toString());
         });
         return fileNames;
     }

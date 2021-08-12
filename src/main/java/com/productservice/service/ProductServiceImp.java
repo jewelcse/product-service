@@ -86,6 +86,16 @@ public class ProductServiceImp  implements ProductService{
 
     @Override
     public void removeProduct(Product product){
+
+
+        product.getProductImages().forEach(image->{
+            try {
+                Files.delete(Paths.get("uploads/"+image));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
          productRepository.delete(product);
          cachingService.evictAllCaches();
     }
