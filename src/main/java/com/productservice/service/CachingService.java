@@ -8,20 +8,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class CachingService {
 
-    @Autowired
-    CacheManager cacheManager;
-
-    public void evictSingleCacheValue(String cacheName, String cacheKey) {
-        cacheManager.getCache(cacheName).evict(cacheKey);
-    }
-
-    public void evictAllCacheValues(String cacheName) {
-        cacheManager.getCache(cacheName).clear();
-    }
-
-
-    public void evictAllCaches() {
-        System.out.println("Cached Cleared!");
-        cacheManager.getCacheNames().stream().forEach(cache->cacheManager.getCache(cache).clear());
-    }
+//    @Autowired
+//    CacheManager cacheManager;
+//
+//    public void evictSingleCacheValue(String cacheName, String cacheKey) {
+//        cacheManager.getCache(cacheName).evict(cacheKey);
+//    }
+//
+//    public void evictAllCacheValues(String cacheName) {
+//        cacheManager.getCache(cacheName).clear();
+//    }
+//
+//
+//    public void evictAllCaches() {
+//        System.out.println("Cached Cleared!");
+//        cacheManager.getCacheNames().stream().forEach(cache->cacheManager.getCache(cache).clear());
+//    }
 }

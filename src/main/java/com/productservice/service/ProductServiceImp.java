@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -80,7 +81,7 @@ public class ProductServiceImp  implements ProductService{
 
     @Override
     public Product saveOrUpdateProduct(Product product) {
-        cachingService.evictAllCaches();
+        //cachingService.evictAllCaches();
         return productRepository.save(product);
     }
 
@@ -97,7 +98,7 @@ public class ProductServiceImp  implements ProductService{
         });
 
          productRepository.delete(product);
-         cachingService.evictAllCaches();
+         //cachingService.evictAllCaches();
     }
 
     @Override

@@ -19,8 +19,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -97,10 +99,19 @@ public class ProductController {
     private List<String> saveImages(MultipartFile[] files) throws IOException {
         List<String> fileNames = new ArrayList<>();
         Arrays.asList(files).stream().forEach(file->{
-
-            fileNames.add(productService.saveFiles(file).toString());
+            fileNames.add(productService.saveFiles(file));
         });
         return fileNames;
+    }
+
+
+    @GetMapping("/uploads/view/{filename:.+}")
+    public byte[] getSingleImg(@PathVariable String filename, HttpServletRequest request) throws IOException {
+        File serverFile = new File("uploads/" + filename);
+        if(serverFile.exists()){
+            return Files.readAllBytes(serverFile.toPath());
+        }
+        return null;
     }
 
     @GetMapping("/uploads/{filename:.+}")
