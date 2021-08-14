@@ -13,4 +13,6 @@ public interface ProductRepository extends JpaRepository<Product,Integer> {
 
     //@Query(value = "SELECT * FROM product WHERE productSlug := ps")
     Optional<Product> findByProductSlug(String ps);
+
+    List<Product> findAllByCategoryId(int categoryId);
 }

@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/product-service/")
+@CrossOrigin
 public class ProductController {
 
     private ProductServiceImp productService;
@@ -160,7 +161,7 @@ public class ProductController {
     /*
     User and Admin endpoint for get all product list
      */
-    @CrossOrigin(origins = "http://localhost:3000")
+
     @GetMapping("/get/products")
     @Cacheable(value = "products")
     public ResponseEntity<JsonResponseEntityModel> getAllProduct(){
@@ -170,7 +171,14 @@ public class ProductController {
         return new ResponseEntity<>(responseEntityModel,HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @GetMapping("/get/products/byCategory/{categoryId}")
+    public ResponseEntity<JsonResponseEntityModel> getCategoryProducts(@PathVariable int categoryId){
+        responseEntityModel.setSuccess(true);
+        responseEntityModel.setData(productService.getCategoryProducts(categoryId));
+        responseEntityModel.setStatusCode("200");
+        return new ResponseEntity<>(responseEntityModel,HttpStatus.OK);
+    }
+
     @GetMapping("/get/product")
     public ResponseEntity<JsonResponseEntityModel> getSingleProduct(@RequestParam int productId){
 

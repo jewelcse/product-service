@@ -112,6 +112,11 @@ public class ProductServiceImp  implements ProductService{
     }
 
     @Override
+    public List<Product> getCategoryProducts(int categoryId) {
+        return productRepository.findAllByCategoryId(categoryId);
+    }
+
+    @Override
     public List<Product> getProducts() {
         System.out.println("Fetching Data from Database");
         return  productRepository.findAll();

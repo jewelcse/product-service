@@ -17,4 +17,6 @@ public interface ProductService {
     void removeProduct(Product product);
 
     boolean getProductByProductSlug(String ps);
+
+    List<Product> getCategoryProducts(int categoryId);
 }

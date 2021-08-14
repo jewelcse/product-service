@@ -9,6 +9,7 @@ import springfox.documentation.spring.web.plugins.Docket;
 
 @SpringBootApplication
 //@EnableCaching
+
 public class ProductServiceApplication {
 
 	public static void main(String[] args) {
