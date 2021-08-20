@@ -3,6 +3,7 @@ package com.productservice.controller;
 import com.productservice.entity.Product;
 import com.productservice.exception.ApplicationException;
 import com.productservice.exception.ProductNotFoundException;
+import com.productservice.service.ProductService;
 import com.productservice.service.ProductServiceImp;
 import com.productservice.util.JsonResponseEntityModel;
 import com.productservice.util.MethodUtils;
@@ -32,12 +33,13 @@ import java.util.stream.Collectors;
 @CrossOrigin
 public class ProductController {
 
-    private ProductServiceImp productService;
+
+    private ProductService productService;
     JsonResponseEntityModel responseEntityModel = new JsonResponseEntityModel();
     private String url = "localhost:8200/api/v1/product-service/uploads/";
 
     @Autowired
-    public ProductController(ProductServiceImp productService){
+    public ProductController(ProductService productService){
         this.productService = productService;
     }
 
@@ -121,7 +123,7 @@ public class ProductController {
         String contentType = null;
         try {
             contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-            System.out.println(resource.getFile().getAbsolutePath() + " content");
+            //System.out.println(resource.getFile().getAbsolutePath() + " content");
         } catch (IOException ex) {
             System.out.println("Could not determine file type.");
         }
@@ -131,7 +133,7 @@ public class ProductController {
             contentType = "application/octet-stream";
         }
 
-        System.out.println(resource.getFilename() + " resoyrce");
+        //System.out.println(resource.getFilename() + " resoyrce");
         return ResponseEntity.ok() .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"").body(resource);
 
@@ -144,16 +146,12 @@ public class ProductController {
      */
     @DeleteMapping("/remove/product")
     public ResponseEntity<String> removeProduct(@RequestParam int id){
-
         if (id<0 ){
             throw new ApplicationException("Invalid Product Id!");
         }
-
         Product product = productService.getProductById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found for this id :: " + id));
-
         productService.removeProduct(product);
-
         return new ResponseEntity<>(MethodUtils.prepareSuccessJSON(HttpStatus.OK,"Product Deleted Successfully"),HttpStatus.OK);
 
     }
@@ -185,10 +183,8 @@ public class ProductController {
         if (productId<0 ){
             throw new ApplicationException("Invalid Product Id!");
         }
-
         Product product = productService.getProductById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found for this id :" + productId));
-
         responseEntityModel.setSuccess(true);
         responseEntityModel.setData(product);
         responseEntityModel.setStatusCode("200");

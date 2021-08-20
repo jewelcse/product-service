@@ -1,6 +1,7 @@
 package com.productservice.service;
 
 import com.productservice.entity.Product;
+import com.productservice.exception.ApplicationException;
 import com.productservice.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -52,7 +53,7 @@ public class ProductServiceImp  implements ProductService{
             throw new RuntimeException("Could not store the file. Error: " + e.getMessage());
         }
     }
-
+    @Override
     public String saveFiles(MultipartFile file){
         try {
             Files.copy(file.getInputStream(), this.root.resolve(file.getOriginalFilename()));
@@ -62,7 +63,7 @@ public class ProductServiceImp  implements ProductService{
         }
 
     }
-
+    @Override
     public Resource load(String filename) {
         try {
             Path file = root.resolve(filename);
@@ -99,6 +100,27 @@ public class ProductServiceImp  implements ProductService{
 
          productRepository.delete(product);
          //cachingService.evictAllCaches();
+    }
+
+    @Override
+    public void removeProduct(int productId){
+
+        Product product = productRepository.findById(productId).get();
+
+        if (product == null){
+            throw new ApplicationException("Product Not Found for Id: " + productId);
+        }
+
+        product.getProductImages().forEach(image->{
+            try {
+                Files.delete(Paths.get("uploads/"+image));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        productRepository.delete(product);
+        //cachingService.evictAllCaches();
     }
 
     @Override
