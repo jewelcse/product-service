@@ -126,7 +126,11 @@ public class ProductServiceImp  implements ProductService{
     @Override
     public boolean getProductByProductSlug(String ps) {
         Optional<Product> product =  productRepository.findByProductSlug(ps);
-        return !product.isEmpty();
+
+        if (product== null){
+            return true;
+        }
+        return false;
     }
 
     @Override
