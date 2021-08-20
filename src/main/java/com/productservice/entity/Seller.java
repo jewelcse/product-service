@@ -3,17 +3,15 @@ package com.productservice.entity;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@Entity(name = "sellers")
+@Entity
+@Table(name = "sellers")
 public class Seller {
 
     @Id
