@@ -1,8 +1,10 @@
 package com.productservice.service;
 
+import com.productservice.dto.ProductDto;
 import com.productservice.entity.Product;
 import com.productservice.exception.ApplicationException;
 import com.productservice.repository.ProductRepository;
+import com.productservice.util.MethodUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -17,9 +19,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @Service
@@ -87,9 +87,46 @@ public class ProductServiceImp  implements ProductService{
 
 
     @Override
-    public Product saveOrUpdateProduct(Product product) {
+    public Product saveOrUpdateProduct(ProductDto dto_product) throws IOException {
         //cachingService.evictAllCaches();
-        return productRepository.save(product);
+        Product db_product = new Product();
+        db_product.setProductTitle(dto_product.getProductTitle());
+        String ps = MethodUtils.toSlug(dto_product.getProductTitle());
+        db_product.setProductSlug(ps);
+        db_product.setProductOverview(dto_product.getProductOverview());
+        db_product.setProductDescription(dto_product.getProductDescription());
+
+        boolean doesExit = getProductByProductSlug(ps);
+        if (doesExit){
+            throw new ApplicationException(dto_product.getProductTitle() + "Already Exit ");
+        }
+
+        db_product.setProductOriginalPrice(dto_product.getProductOriginalPrice());
+        db_product.setDiscountPercentage(dto_product.getDiscountPercentage());
+
+        if (dto_product.getDiscountPercentage()> 0){
+            double disAmount = (dto_product.getProductOriginalPrice()* dto_product.getDiscountPercentage())/100;
+            db_product.setProductFinalPrice(dto_product.getProductOriginalPrice()-disAmount);
+        }else{
+            db_product.setProductFinalPrice(dto_product.getProductOriginalPrice());
+        }
+
+        db_product.setProductImages(saveImages(dto_product.getFiles()));
+
+        db_product.setCategoryId(dto_product.getCategoryId());
+        db_product.setSellerId(dto_product.getSellerId());
+        db_product.setCreatedAt(MethodUtils.getLocalDateTime());
+        db_product.setUpdatedAt(null);
+
+        return productRepository.save(db_product);
+    }
+
+    private List<String> saveImages(MultipartFile[] files) throws IOException {
+        List<String> fileNames = new ArrayList<>();
+        Arrays.asList(files).stream().forEach(file->{
+            fileNames.add(saveFiles(file));
+        });
+        return fileNames;
     }
 
     @Override
