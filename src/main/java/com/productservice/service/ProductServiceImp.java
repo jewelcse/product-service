@@ -6,15 +6,18 @@ import com.productservice.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,8 +59,11 @@ public class ProductServiceImp  implements ProductService{
     @Override
     public String saveFiles(MultipartFile file){
         try {
-            Files.copy(file.getInputStream(), this.root.resolve(file.getOriginalFilename()));
-            return file.getOriginalFilename();
+            long timeInMillis = new Date().getTime();
+            String filename = file.getOriginalFilename().toLowerCase().replaceAll(" ","_");
+            String finalFileName = timeInMillis+"_"+filename;
+            Files.copy(file.getInputStream(), this.root.resolve(finalFileName));
+            return finalFileName;
         } catch (Exception e) {
             throw new RuntimeException("Could not store the file. Error: " + e.getMessage());
         }
@@ -126,10 +132,7 @@ public class ProductServiceImp  implements ProductService{
     @Override
     public boolean getProductByProductSlug(String ps) {
         Optional<Product> product =  productRepository.findByProductSlug(ps);
-
-        if (product== null){
-            return true;
-        }
+        if (product.isPresent()) return true;
         return false;
     }
 
@@ -143,6 +146,18 @@ public class ProductServiceImp  implements ProductService{
         System.out.println("Fetching Data from Database");
         return  productRepository.findAll();
     }
+
+    @Override
+    public List<Product> getProductsWithSorting(String field) {
+        return  productRepository.findAll(Sort.by(Sort.Direction.DESC,field));
+    }
+
+    @Override
+    public Page<Product> getProductsWithPagination(int offset,int pageSize) {
+        return  productRepository.findAll(PageRequest.of(offset,pageSize));
+    }
+
+
 
     @Override
     public Optional<Product> getProductById(int productId) {

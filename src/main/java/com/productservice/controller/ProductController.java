@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -36,7 +37,6 @@ public class ProductController {
 
     private ProductService productService;
     JsonResponseEntityModel responseEntityModel = new JsonResponseEntityModel();
-    private String url = "localhost:8200/api/v1/product-service/uploads/";
 
     @Autowired
     public ProductController(ProductService productService){
@@ -168,6 +168,31 @@ public class ProductController {
         responseEntityModel.setStatusCode("200");
         return new ResponseEntity<>(responseEntityModel,HttpStatus.OK);
     }
+
+    @GetMapping("/get/products/{field}")
+    public ResponseEntity<JsonResponseEntityModel> getAllProductWithSorting(@PathVariable String field){
+        responseEntityModel.setSuccess(true);
+        List<Product> data = productService.getProductsWithSorting(field);
+        responseEntityModel.setData(data);
+        responseEntityModel.setDataSize(data.size());
+        responseEntityModel.setStatusCode("200");
+        return new ResponseEntity<>(responseEntityModel,HttpStatus.OK);
+    }
+
+    @GetMapping("/get/products/{offset}/{pageSize}")
+    public ResponseEntity<JsonResponseEntityModel> getAllProductWithPagination(
+            @PathVariable int offset,
+            @PathVariable int pageSize){
+        responseEntityModel.setSuccess(true);
+        Page<Product> data = productService.getProductsWithPagination(offset,pageSize);
+        responseEntityModel.setData(data);
+        responseEntityModel.setDataSize(data.getSize());
+        responseEntityModel.setStatusCode("200");
+        return new ResponseEntity<>(responseEntityModel,HttpStatus.OK);
+    }
+
+
+
 
     @GetMapping("/get/products/byCategory/{categoryId}")
     public ResponseEntity<JsonResponseEntityModel> getCategoryProducts(@PathVariable int categoryId){
