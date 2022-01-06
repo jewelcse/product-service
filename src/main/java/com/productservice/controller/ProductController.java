@@ -30,7 +30,7 @@ import java.util.*;
 public class ProductController {
 
 
-    private ProductService productService;
+    private final ProductService productService;
     JsonResponseEntityModel<Object> responseEntityModel = new JsonResponseEntityModel<>();
 
     @Autowired
@@ -41,7 +41,6 @@ public class ProductController {
 
     @PostMapping(path = "/product/create",consumes = {"multipart/form-data"})//consumes = {"multipart/form-data"}
     public ResponseEntity<JsonResponseEntityModel<Object>> createProduct(@ModelAttribute ProductDto dto_product) throws IOException {
-
 
         if (dto_product.getProductTitle().isEmpty() || dto_product.getProductTitle() == null){
             throw new ApplicationException("Product Title can't be Empty");
@@ -69,14 +68,16 @@ public class ProductController {
 
 
 
-
-
     @GetMapping("/uploads/view/{filename:.+}")
     public byte[] getSingleImg(@PathVariable String filename, HttpServletRequest request) throws IOException {
         File serverFile = new File("uploads/" + filename);
         if(serverFile.exists()){
             return Files.readAllBytes(serverFile.toPath());
         }
+
+        int a=9,b=2;
+        float f;
+        f = a/b;
         return null;
     }
 
@@ -124,9 +125,9 @@ public class ProductController {
      */
 
     @GetMapping("/get/products")
-    @Cacheable(value = "products")
     public ResponseEntity<JsonResponseEntityModel<Object>> getAllProduct(){
         responseEntityModel.setSuccess(true);
+        //System.out.println(productService.getProducts());
         responseEntityModel.setData(productService.getProducts());
         responseEntityModel.setStatusCode("200");
         return new ResponseEntity<>(responseEntityModel,HttpStatus.OK);
@@ -157,7 +158,7 @@ public class ProductController {
 
 
 
-    @GetMapping("/get/products/byCategory/{categoryId}")
+    @GetMapping("/get/products/category/{categoryId}")
     public ResponseEntity<JsonResponseEntityModel<Object>> getCategoryProducts(@PathVariable int categoryId){
         responseEntityModel.setSuccess(true);
         responseEntityModel.setData(productService.getCategoryProducts(categoryId));

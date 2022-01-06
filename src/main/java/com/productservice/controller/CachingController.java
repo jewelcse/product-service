@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class CachingController {
 
-//    @Autowired
-//    CachingService cachingService;
-//
-//    @GetMapping("/clearAllCaches")
-//    public ResponseEntity<String> clearAllCaches() {
-//        cachingService.evictAllCaches();
-//        return new ResponseEntity<>("Cleared ALL Caches Successfully!", HttpStatus.OK);
-//
-//    }
+    @Autowired
+    CachingService cachingService;
+
+    @GetMapping("/clearAllCaches")
+    public ResponseEntity<String> clearAllCaches() {
+        cachingService.evictAllCaches();
+        return new ResponseEntity<>("Cleared ALL Caches Successfully!", HttpStatus.OK);
+
+    }
 }

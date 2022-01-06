@@ -1,3 +1,6 @@
+
+
+
 package com.productservice.entity;
 
 
@@ -8,11 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "products")
+
 public class Product{
 
     @Id
@@ -34,11 +39,6 @@ public class Product{
     private int discountPercentage;
     private String createdAt;
     private String updatedAt;
-
-
-    @ManyToOne(targetEntity=Seller.class, cascade = CascadeType.MERGE)
-    @JoinColumn(name="sellerId", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
-    private Seller seller;
 
 
     
