@@ -17,19 +17,5 @@ public class ProductServiceApplication {
 	}
 
 
-	@Primary
-	@Bean
-	public RemoteTokenServices tokenService() {
-		RemoteTokenServices tokenService = new RemoteTokenServices();
-		tokenService.setCheckTokenEndpointUrl(
-				"http://localhost:9191/oauth/check_token");
-		tokenService.setClientId("web");
-		tokenService.setClientSecret("secret");
-		return tokenService;
-	}
 
-	@Bean
-	RestTemplate restTemplate(){
-		return new RestTemplate();
-	}
 }

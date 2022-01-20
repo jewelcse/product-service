@@ -24,7 +24,7 @@ public interface ProductService {
     Product saveOrUpdateProduct(ProductDto product) throws IOException;
     void removeProduct(Product product);
     void removeProduct(int productId);
-    boolean getProductByProductSlug(String ps);
+    Product getProductByProductSlug(String ps);
     List<Product> getCategoryProducts(int categoryId);
 
 

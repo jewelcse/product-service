@@ -26,7 +26,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/product-service/")
-@CrossOrigin
 public class ProductController {
 
 
@@ -178,6 +177,11 @@ public class ProductController {
         responseEntityModel.setData(product);
         responseEntityModel.setStatusCode("200");
         return new ResponseEntity<JsonResponseEntityModel<Object>>(responseEntityModel,HttpStatus.OK);
+    }
+
+    @GetMapping("/get/product/{slug}")
+    public ResponseEntity<Product> getProductBySlug(@PathVariable String slug){
+        return new ResponseEntity<Product>(productService.getProductByProductSlug(slug),HttpStatus.OK);
     }
 
     @PostMapping("/update/product/{id}")

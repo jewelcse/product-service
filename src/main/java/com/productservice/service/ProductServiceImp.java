@@ -106,9 +106,9 @@ public class ProductServiceImp  implements ProductService{
         db_product.setProductOverview(dto_product.getProductOverview());
         db_product.setProductDescription(dto_product.getProductDescription());
 
-        boolean doesExit = getProductByProductSlug(ps);
-        if (doesExit){
-            throw new ApplicationException(dto_product.getProductTitle() + "Already Exit ");
+        Optional<Product> product =  productRepository.findByProductSlug(ps);
+        if (product.isPresent()){
+            throw new ApplicationException("Already Added!");
         }
 
         db_product.setProductOriginalPrice(dto_product.getProductOriginalPrice());
@@ -180,9 +180,12 @@ public class ProductServiceImp  implements ProductService{
 
     @Override
     @Cacheable(value = "products",key = "#ps")
-    public boolean getProductByProductSlug(String ps) {
+    public Product getProductByProductSlug(String ps) {
         Optional<Product> product =  productRepository.findByProductSlug(ps);
-        return product.isPresent();
+        if (product.isPresent()){
+            return product.get();
+        }
+        return null;
     }
 
     @Override
