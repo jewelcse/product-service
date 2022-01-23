@@ -1,17 +1,23 @@
 package com.productservice.service;
 
+import com.productservice.dto.CustomPrincipal;
 import com.productservice.dto.ProductDto;
 import com.productservice.entity.Product;
 import com.productservice.exception.ApplicationException;
 import com.productservice.repository.ProductRepository;
 import com.productservice.util.MethodUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -28,8 +34,11 @@ public class ProductServiceImp  implements ProductService{
 
     private final Path root = Paths.get("uploads");
 
-    private ProductRepository productRepository;
-    private CachingService cachingService;
+    private final ProductRepository productRepository;
+    private final CachingService cachingService;
+
+    @Autowired
+    public RestTemplate restTemplate;
 
     @Autowired
     public ProductServiceImp(ProductRepository repository,CachingService service){
@@ -70,6 +79,7 @@ public class ProductServiceImp  implements ProductService{
 
     }
     @Override
+    @Cacheable(value = "products",key = "#filename")
     public Resource load(String filename) {
         try {
             Path file = root.resolve(filename);
@@ -88,7 +98,7 @@ public class ProductServiceImp  implements ProductService{
 
     @Override
     public Product saveOrUpdateProduct(ProductDto dto_product) throws IOException {
-        //cachingService.evictAllCaches();
+        cachingService.evictAllCaches();
         Product db_product = new Product();
         db_product.setProductTitle(dto_product.getProductTitle());
         String ps = MethodUtils.toSlug(dto_product.getProductTitle());
@@ -96,9 +106,9 @@ public class ProductServiceImp  implements ProductService{
         db_product.setProductOverview(dto_product.getProductOverview());
         db_product.setProductDescription(dto_product.getProductDescription());
 
-        boolean doesExit = getProductByProductSlug(ps);
-        if (doesExit){
-            throw new ApplicationException(dto_product.getProductTitle() + "Already Exit ");
+        Optional<Product> product =  productRepository.findByProductSlug(ps);
+        if (product.isPresent()){
+            throw new ApplicationException("Already Added!");
         }
 
         db_product.setProductOriginalPrice(dto_product.getProductOriginalPrice());
@@ -114,7 +124,7 @@ public class ProductServiceImp  implements ProductService{
         db_product.setProductImages(saveImages(dto_product.getFiles()));
 
         db_product.setCategoryId(dto_product.getCategoryId());
-        db_product.setSellerId(dto_product.getSellerId());
+        db_product.setSellerId(getUser().getId());
         db_product.setCreatedAt(MethodUtils.getLocalDateTime());
         db_product.setUpdatedAt(null);
 
@@ -130,6 +140,7 @@ public class ProductServiceImp  implements ProductService{
     }
 
     @Override
+    @CacheEvict(value = "products",key = "#product")
     public void removeProduct(Product product){
 
 
@@ -142,10 +153,11 @@ public class ProductServiceImp  implements ProductService{
         });
 
          productRepository.delete(product);
-         //cachingService.evictAllCaches();
+         cachingService.evictAllCaches();
     }
 
     @Override
+    @CacheEvict(value = "products",key = "#productId")
     public void removeProduct(int productId){
 
         Product product = productRepository.findById(productId).get();
@@ -163,22 +175,27 @@ public class ProductServiceImp  implements ProductService{
         });
 
         productRepository.delete(product);
-        //cachingService.evictAllCaches();
+        cachingService.evictAllCaches();
     }
 
     @Override
-    public boolean getProductByProductSlug(String ps) {
+    @Cacheable(value = "products",key = "#ps")
+    public Product getProductByProductSlug(String ps) {
         Optional<Product> product =  productRepository.findByProductSlug(ps);
-        if (product.isPresent()) return true;
-        return false;
+        if (product.isPresent()){
+            return product.get();
+        }
+        return null;
     }
 
     @Override
+    @Cacheable(value = "products",key = "#categoryId")
     public List<Product> getCategoryProducts(int categoryId) {
         return productRepository.findAllByCategoryId(categoryId);
     }
 
     @Override
+    @Cacheable(value = "products")
     public List<Product> getProducts() {
         System.out.println("Fetching Data from Database");
         return  productRepository.findAll();
@@ -197,7 +214,15 @@ public class ProductServiceImp  implements ProductService{
 
 
     @Override
+    @Cacheable(value = "product",key = "#productId")
     public Optional<Product> getProductById(int productId) {
         return productRepository.findById(productId);
+    }
+
+    private CustomPrincipal getUser(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Map<String, String> vars = new HashMap<>();
+        vars.put("username", authentication.getPrincipal().toString());
+        return restTemplate.getForObject("http://localhost:9191/api/v1/auth-service/user/{username}",CustomPrincipal.class,vars);
     }
 }

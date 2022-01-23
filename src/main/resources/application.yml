@@ -1,0 +1,18 @@
+#spring:
+#  security:
+#    oauth2:
+#      resource:
+#        token-info-uri: http://localhost:9191/oauth/check_token
+#      client:
+#        client-id: web
+#        client-secret: pin
+
+######## Set up Eureka client ############
+#eureka:
+#  client:
+#    registerWithEureka: true
+#    fetchRegistry: true
+#    serverviceUrl:
+#      defaultZone: http://localhost:8761/eureka/
+#  instance:
+#    hostname: localhost

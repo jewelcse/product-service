@@ -1,6 +1,10 @@
+
+
+
 package com.productservice.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -8,11 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "products")
+
 public class Product{
 
     @Id
@@ -21,9 +27,11 @@ public class Product{
     private int id;
     private String productTitle;
     private String productSlug;
+    @Column(columnDefinition = "TEXT")
     private String productOverview;
+    @Column(columnDefinition = "TEXT")
     private String productDescription;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "product_images_table", joinColumns = @JoinColumn(name = "id"))
     private List<String> productImages;
     private int categoryId;
@@ -34,11 +42,6 @@ public class Product{
     private int discountPercentage;
     private String createdAt;
     private String updatedAt;
-
-
-    @ManyToOne(targetEntity=Seller.class, cascade = CascadeType.MERGE)
-    @JoinColumn(name="sellerId", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
-    private Seller seller;
 
 
     
